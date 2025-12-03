@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: mi-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass "RedisLocalPass"
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: investment_user
+      POSTGRES_PASSWORD: investment123#
+      POSTGRES_DB: investmenttracker-dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
+  redis_data:
