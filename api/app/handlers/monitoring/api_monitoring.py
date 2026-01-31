@@ -72,14 +72,12 @@ class APIMonitoring:
             logger.info("📊 Monitoring api request", extra=extra_data)
         
             return response
-        except ResponseErrorException as re:
-            print("UnifiedValidationException caught in API monitoring middleware.")
-            return await api_monitoring(request, re)
+        except ResponseErrorException:
+            # Re-raise to let FastAPI's exception handler process it
+            raise
         except Exception as e:
-            print("Error in API monitoring middleware:", str(e))
             logger.error("❌ Error in API monitoring middleware", extra={"error": str(e), "stack_trace": traceback.format_exc()})
             raise e
-            #return ResponseErrorException.internal_error("Internal server error in monitoring middleware")
 
 # Middleware para inyectar en FastAPI
 api_monitoring = APIMonitoring()

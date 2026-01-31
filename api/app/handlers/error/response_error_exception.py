@@ -54,7 +54,7 @@ class ResponseErrorException(HTTPException):
     @classmethod
     def forbidden(cls, detail: str = "forbidden", stack: str = ""):
         """Error 403 - Forbidden"""
-        raise cls(
+        return cls(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=detail,
             stack=stack,
@@ -64,7 +64,7 @@ class ResponseErrorException(HTTPException):
     @classmethod
     def not_found(cls, detail: str = "Not Found", stack: str = ""):
         """Error 404 - Not Found"""
-        raise cls(
+        return cls(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=detail,
             stack=stack,
@@ -74,7 +74,7 @@ class ResponseErrorException(HTTPException):
     @classmethod
     def conflict(cls, detail: str = "Conflict", stack: str = ""):
         """Error 409 - Conflict"""
-        raise cls(
+        return cls(
             status_code=status.HTTP_409_CONFLICT,
             detail=detail,
             stack=stack,
@@ -82,19 +82,19 @@ class ResponseErrorException(HTTPException):
         )
     
     @classmethod
-    def unprocessable_entity(cls, detail: str = "Unprocessable Entity", stack: str = "", validation_errors: list = []):
+    def unprocessable_entity(cls, detail: str = "Unprocessable Entity", stack: str = "", validation_errors: list = None):
         """Error 422 - Unprocessable Entity"""
         return cls(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=detail, 
             stack=stack, 
-            validation_errors=validation_errors
+            validation_errors=validation_errors or []
         )
     
     @classmethod
     def internal_error(cls, detail: str = "Internal Server Error", stack: str = ""):
         """Error 500 - Internal Server Error"""
-        raise cls(
+        return cls(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=detail,
             stack=stack,
@@ -102,9 +102,9 @@ class ResponseErrorException(HTTPException):
         )
     
     @classmethod
-    def service_unavailable(cls, detail: str = "Servicio no disponible", stack: str = ""):
+    def service_unavailable(cls, detail: str = "Service unavailable", stack: str = ""):
         """Error 503 - Service Unavailable"""
-        raise cls(
+        return cls(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=detail,
             stack=stack,
@@ -113,15 +113,18 @@ class ResponseErrorException(HTTPException):
     
     @classmethod
     def from_exception(cls, exc: Exception, detail: str = ""):
+        """Creates appropriate error from exception type"""
         stack = traceback.format_exc()
         detail = detail or str(exc)
         
         if isinstance(exc, ValueError):
-            raise cls.bad_request(detail, stack)
+            return cls.bad_request(detail, stack)
         elif isinstance(exc, PermissionError):
-            raise cls.forbidden(detail, stack)
+            return cls.forbidden(detail, stack)
         elif isinstance(exc, FileNotFoundError):
-            raise cls.internal_error(detail, stack)
+            return cls.not_found(detail, stack)
+        else:
+            return cls.internal_error(detail, stack)
 
 def get_stack_trace() -> str:
     return traceback.format_exc()

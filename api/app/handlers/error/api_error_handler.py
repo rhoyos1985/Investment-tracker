@@ -16,7 +16,7 @@ async def api_error(request: Request, exc: ResponseErrorException):
     error_messages = []
     print(f"Exception details: {exc.detail}")
     if hasattr(exc, 'validation_errors') and exc.validation_errors:
-        for error in exc.errors():
+        for error in exc.validation_errors:
             field = error["loc"][-1] if error["loc"] else "campo desconocido"
             error_type = error["type"]
             msg = error["msg"]

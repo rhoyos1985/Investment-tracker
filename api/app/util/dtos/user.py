@@ -1,7 +1,10 @@
 from pydantic import BaseModel, EmailStr, field_validator, Field
 from typing import Optional
+from datetime import datetime
+
 
 class UserDTO(BaseModel):
+    """DTO for user creation/update requests"""
     id: Optional[str] = None
     first_name: str = Field(
         ..., 
@@ -36,8 +39,7 @@ class UserDTO(BaseModel):
     @field_validator('first_name', 'last_name', 'username', 'email', 'password', mode='before')
     def check_required_fields(cls, v, field):
         if isinstance(v, str) and not v.strip():
-            print(f'Validation error: {field.name} is required and cannot be empty')
-            raise ValueError(f'{field.name} is required and cannot be empty')
+            raise ValueError(f'{field.field_name} is required and cannot be empty')
         return v
     
     @field_validator('username')
@@ -49,7 +51,23 @@ class UserDTO(BaseModel):
     @field_validator('password')
     def validate_password(cls, v):
         if len(v) < 6:
-            raise ValueError('La contraseña debe tener al menos 6 caracteres')
+            raise ValueError('Password must be at least 6 characters')
         if v.isalpha():
-            raise ValueError('La contraseña debe contener al menos un número o carácter especial')
+            raise ValueError('Password must contain at least one number or special character')
         return v
+
+
+class UserResponseDTO(BaseModel):
+    """DTO for user responses (without sensitive data like password)"""
+    id: str
+    first_name: str
+    last_name: str
+    username: str
+    email: str
+    is_active: bool
+    is_admin: bool
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
